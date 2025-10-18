@@ -80,31 +80,7 @@ export function createGroups(
   const requiredGrades = [9, 10, 11, 12];
   const requiredGenders: Array<'m' | 'f'> = ['m', 'f'];
 
-  // First pass: Try to give each group one student from each grade and gender
-  for (const grade of requiredGrades) {
-    for (const gender of requiredGenders) {
-      // Randomize which groups get assigned first
-      const groupIndices = shuffleArray(Array.from({ length: numGroups }, (_, i) => i));
-
-      for (const i of groupIndices) {
-        const groupHasGradeAndGender = groups[i].students.some(
-          s => s.grade === grade && s.gender === gender
-        );
-
-        if (!groupHasGradeAndGender) {
-          const studentIndex = availableStudents.findIndex(
-            s => s.grade === grade && s.gender === gender
-          );
-          if (studentIndex !== -1) {
-            groups[i].students.push(availableStudents[studentIndex]);
-            availableStudents.splice(studentIndex, 1);
-          }
-        }
-      }
-    }
-  }
-
-  // Second pass: Ensure each group has at least one of each gender
+  // First pass: Ensure each group has at least one of each gender
   for (const gender of requiredGenders) {
     const groupIndices = shuffleArray(Array.from({ length: numGroups }, (_, i) => i));
     for (const i of groupIndices) {
@@ -119,7 +95,7 @@ export function createGroups(
     }
   }
 
-  // Third pass: Ensure each group has at least one from each grade
+  // Second pass: Ensure each group has at least one from each grade
   for (const grade of requiredGrades) {
     const groupIndices = shuffleArray(Array.from({ length: numGroups }, (_, i) => i));
     for (const i of groupIndices) {
@@ -152,7 +128,10 @@ export function createGroups(
     }
   }
 
+  // Shuffle students within each group to make force pairings less obvious
   groups.forEach((group) => {
+    group.students = shuffleArray(group.students);
+
     const grades = new Set(group.students.map(s => s.grade));
     const genders = new Set(group.students.map(s => s.gender));
 
