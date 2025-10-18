@@ -75,6 +75,27 @@ export function createGroups(
     groups[bestGroupIdx].students.push(...pairingGroup);
   });
 
+  // Ensure each group has at least one student from each grade (9, 10, 11, 12)
+  const requiredGrades = [9, 10, 11, 12];
+  for (const grade of requiredGrades) {
+    const studentsOfGrade = availableStudents.filter(s => s.grade === grade);
+
+    // Distribute one student of this grade to each group (if possible)
+    for (let i = 0; i < numGroups && studentsOfGrade.length > 0; i++) {
+      // Check if this group already has a student of this grade
+      const groupHasGrade = groups[i].students.some(s => s.grade === grade);
+
+      if (!groupHasGrade) {
+        // Find a student of this grade still available
+        const studentIndex = availableStudents.findIndex(s => s.grade === grade);
+        if (studentIndex !== -1) {
+          groups[i].students.push(availableStudents[studentIndex]);
+          availableStudents.splice(studentIndex, 1);
+        }
+      }
+    }
+  }
+
   let currentGroupIndex = 0;
   while (availableStudents.length > 0) {
     const targetSize = currentGroupIndex < extraStudents ? studentsPerGroup + 1 : studentsPerGroup;
