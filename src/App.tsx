@@ -44,7 +44,8 @@ function App() {
       text: '#1f2937',
       card: '#ffffff',
       accent: '#3b82f6'
-    }
+    },
+    animationDuration: 0.4
   });
   const [modalOpen, setModalOpen] = useState(false);
   const [toasts, setToasts] = useState<Toast[]>([]);
@@ -202,7 +203,8 @@ function App() {
           text: '#1f2937',
           card: '#ffffff',
           accent: '#3b82f6'
-        }
+        },
+        animationDuration: 0.4
       });
       setGroups([]);
       addToast('Settings reset successfully!', 'success');
@@ -371,6 +373,8 @@ function App() {
                     accent: groupColors[groupIdx] || colorPalette[groupIdx % colorPalette.length]
                   }}
                   density={theme.density}
+                  animationDuration={settings.animationDuration || 0.4}
+                  animationDelay={orderIdx * 0.1}
                 />
               );
             })}

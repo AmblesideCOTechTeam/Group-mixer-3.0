@@ -165,6 +165,25 @@ export function SettingsPanel({
 
             <ConfettiToggle enabled={confettiEnabled} onToggle={onConfettiToggle} />
 
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Animation Duration: {(settings.animationDuration || 0.4).toFixed(1)}s
+              </label>
+              <input
+                type="range"
+                min="0.1"
+                max="2.0"
+                step="0.1"
+                value={settings.animationDuration || 0.4}
+                onChange={(e) => onSettingsChange({ ...settings, animationDuration: parseFloat(e.target.value) })}
+                className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+              />
+              <div className="flex justify-between text-xs text-gray-500 mt-1">
+                <span>Fast (0.1s)</span>
+                <span>Slow (2.0s)</span>
+              </div>
+            </div>
+
             <button
               onClick={onReset}
               className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-red-500 hover:bg-red-600 text-white rounded-lg font-medium transition-colors"

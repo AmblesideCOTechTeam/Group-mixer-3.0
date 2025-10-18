@@ -11,9 +11,11 @@ interface GroupCardProps {
   onNameChange: (newName: string) => void;
   colors: { card: string; text: string; accent?: string };
   density?: 'compact' | 'spacious';
+  animationDuration?: number;
+  animationDelay?: number;
 }
 
-export function GroupCard({ groupName, students, index, onNameChange, colors, density = 'spacious' }: GroupCardProps) {
+export function GroupCard({ groupName, students, index, onNameChange, colors, density = 'spacious', animationDuration = 0.4, animationDelay = 0 }: GroupCardProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editName, setEditName] = useState(groupName);
 
@@ -31,7 +33,7 @@ export function GroupCard({ groupName, students, index, onNameChange, colors, de
     <motion.div
       initial={{ opacity: 0, scale: 0.9, y: 20 }}
       animate={{ opacity: 1, scale: 1, y: 0 }}
-      transition={{ duration: 0.4, delay: index * 0.1 }}
+      transition={{ duration: animationDuration, delay: animationDelay }}
       className="rounded-xl shadow-lg overflow-hidden"
       style={{ backgroundColor: colors.card, borderLeft: `4px solid ${headerBg}` }}
     >

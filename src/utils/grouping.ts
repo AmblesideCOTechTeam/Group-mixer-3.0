@@ -35,7 +35,8 @@ export function createGroups(
   const studentsPerGroup = Math.floor(students.length / numGroups);
   const extraStudents = students.length % numGroups;
 
-  const allStudents = shuffleArray([...students]);
+  // Randomize the initial order before any processing
+  const allStudents = shuffleArray(shuffleArray(shuffleArray([...students])));
   const availableStudents = [...allStudents];
 
   forceAssignments.forEach(assignment => {
@@ -75,18 +76,55 @@ export function createGroups(
     groups[bestGroupIdx].students.push(...pairingGroup);
   });
 
-  // Ensure each group has at least one student from each grade (9, 10, 11, 12)
+  // Ensure each group has balanced gender and grade distribution
   const requiredGrades = [9, 10, 11, 12];
+  const requiredGenders: Array<'m' | 'f'> = ['m', 'f'];
+
+  // First pass: Try to give each group one student from each grade and gender
   for (const grade of requiredGrades) {
-    const studentsOfGrade = availableStudents.filter(s => s.grade === grade);
+    for (const gender of requiredGenders) {
+      // Randomize which groups get assigned first
+      const groupIndices = shuffleArray(Array.from({ length: numGroups }, (_, i) => i));
 
-    // Distribute one student of this grade to each group (if possible)
-    for (let i = 0; i < numGroups && studentsOfGrade.length > 0; i++) {
-      // Check if this group already has a student of this grade
+      for (const i of groupIndices) {
+        const groupHasGradeAndGender = groups[i].students.some(
+          s => s.grade === grade && s.gender === gender
+        );
+
+        if (!groupHasGradeAndGender) {
+          const studentIndex = availableStudents.findIndex(
+            s => s.grade === grade && s.gender === gender
+          );
+          if (studentIndex !== -1) {
+            groups[i].students.push(availableStudents[studentIndex]);
+            availableStudents.splice(studentIndex, 1);
+          }
+        }
+      }
+    }
+  }
+
+  // Second pass: Ensure each group has at least one of each gender
+  for (const gender of requiredGenders) {
+    const groupIndices = shuffleArray(Array.from({ length: numGroups }, (_, i) => i));
+    for (const i of groupIndices) {
+      const groupHasGender = groups[i].students.some(s => s.gender === gender);
+      if (!groupHasGender) {
+        const studentIndex = availableStudents.findIndex(s => s.gender === gender);
+        if (studentIndex !== -1) {
+          groups[i].students.push(availableStudents[studentIndex]);
+          availableStudents.splice(studentIndex, 1);
+        }
+      }
+    }
+  }
+
+  // Third pass: Ensure each group has at least one from each grade
+  for (const grade of requiredGrades) {
+    const groupIndices = shuffleArray(Array.from({ length: numGroups }, (_, i) => i));
+    for (const i of groupIndices) {
       const groupHasGrade = groups[i].students.some(s => s.grade === grade);
-
       if (!groupHasGrade) {
-        // Find a student of this grade still available
         const studentIndex = availableStudents.findIndex(s => s.grade === grade);
         if (studentIndex !== -1) {
           groups[i].students.push(availableStudents[studentIndex]);
@@ -96,17 +134,21 @@ export function createGroups(
     }
   }
 
-  let currentGroupIndex = 0;
+  // Distribute remaining students with randomized group order
+  const distributionOrder = shuffleArray(Array.from({ length: numGroups }, (_, i) => i));
+  let orderIndex = 0;
+
   while (availableStudents.length > 0) {
+    const currentGroupIndex = distributionOrder[orderIndex % distributionOrder.length];
     const targetSize = currentGroupIndex < extraStudents ? studentsPerGroup + 1 : studentsPerGroup;
 
-    while (groups[currentGroupIndex].students.length < targetSize && availableStudents.length > 0) {
+    if (groups[currentGroupIndex].students.length < targetSize) {
       groups[currentGroupIndex].students.push(availableStudents.shift()!);
     }
 
-    currentGroupIndex++;
-    if (currentGroupIndex >= numGroups) {
-      currentGroupIndex = 0;
+    orderIndex++;
+    if (orderIndex >= numGroups) {
+      orderIndex = 0;
     }
   }
 
