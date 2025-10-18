@@ -33,6 +33,7 @@ const colorPalette = [
 function App() {
   const [students, setStudents] = useState<Student[]>([]);
   const [groups, setGroups] = useState<Group[]>([]);
+  const [groupOrder, setGroupOrder] = useState<number[]>([]);
   const [settings, setSettings] = useState<Settings>({
     numGroups: 4,
     groupNames: ['Group 1', 'Group 2', 'Group 3', 'Group 4'],
@@ -154,6 +155,14 @@ function App() {
     setGroups(result.groups);
     addEntry(result.groups);
     trackGrouping(result.groups);
+
+    // Shuffle group column order
+    const newOrder = Array.from({ length: result.groups.length }, (_, i) => i);
+    for (let i = newOrder.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [newOrder[i], newOrder[j]] = [newOrder[j], newOrder[i]];
+    }
+    setGroupOrder(newOrder);
 
     if (result.success) {
       setTimeout(() => {
@@ -347,21 +356,24 @@ function App() {
           </div>
         ) : (
           <div className="grid gap-4" style={{ gridTemplateColumns: `repeat(${groups.length}, 1fr)` }}>
-            {groups.map((group, idx) => (
-              <GroupCard
-                key={idx}
-                groupName={group.name}
-                students={group.students}
-                index={idx}
-                onNameChange={(name) => updateGroupName(idx, name)}
-                colors={{
-                  card: themeColors.card,
-                  text: themeColors.text,
-                  accent: groupColors[idx] || colorPalette[idx % colorPalette.length]
-                }}
-                density={theme.density}
-              />
-            ))}
+            {groupOrder.map((groupIdx, orderIdx) => {
+              const group = groups[groupIdx];
+              return (
+                <GroupCard
+                  key={groupIdx}
+                  groupName={group.name}
+                  students={group.students}
+                  index={orderIdx}
+                  onNameChange={(name) => updateGroupName(groupIdx, name)}
+                  colors={{
+                    card: themeColors.card,
+                    text: themeColors.text,
+                    accent: groupColors[groupIdx] || colorPalette[groupIdx % colorPalette.length]
+                  }}
+                  density={theme.density}
+                />
+              );
+            })}
           </div>
         )}
       </div>

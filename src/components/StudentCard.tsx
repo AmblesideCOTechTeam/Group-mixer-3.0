@@ -17,11 +17,22 @@ const gradeColors: Record<number, string> = {
 export function StudentCard({ student, index }: StudentCardProps) {
   const initials = `${student.first[0]}${student.last[0]}`;
 
+  // Check if user prefers reduced motion
+  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3, delay: index * 0.05 }}
+      initial={prefersReducedMotion ? {} : { opacity: 0, x: -20, y: 10 }}
+      animate={{ opacity: 1, x: 0, y: 0 }}
+      transition={
+        prefersReducedMotion
+          ? { duration: 0 }
+          : {
+              duration: 0.6,
+              delay: index * 0.08,
+              ease: [0.4, 0, 0.2, 1]
+            }
+      }
       className="bg-white rounded-lg p-2 shadow-sm border border-gray-200"
     >
       <div className="font-medium text-gray-900 text-sm">
