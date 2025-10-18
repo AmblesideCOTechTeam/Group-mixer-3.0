@@ -43,7 +43,8 @@ function App() {
       text: '#1f2937',
       card: '#ffffff',
       accent: '#3b82f6'
-    }
+    },
+    animationDuration: 2000
   });
   const [modalOpen, setModalOpen] = useState(false);
   const [toasts, setToasts] = useState<Toast[]>([]);
@@ -60,6 +61,7 @@ function App() {
     return stored || 'Grade Mixer+ Visual Edition';
   });
   const [isEditingTitle, setIsEditingTitle] = useState(false);
+  const [isAnimating, setIsAnimating] = useState(false);
 
   const { theme, effectiveTheme, updateTheme, getBackgroundStyle, getColors } = useTheme();
   const { config: soundConfig, updateConfig: updateSoundConfig, toggleMute, playShuffleSound, playCompleteSound } = useSound();
@@ -141,7 +143,10 @@ function App() {
   };
 
   const handleRandomize = () => {
+    if (isAnimating) return;
+
     playShuffleSound();
+    setIsAnimating(true);
 
     const result = createGroups(
       students,
@@ -151,21 +156,41 @@ function App() {
       settings.forceAssignments
     );
 
-    setGroups(result.groups);
-    addEntry(result.groups);
-    trackGrouping(result.groups);
+    const animationSteps = 20;
+    const intervalDuration = settings.animationDuration / animationSteps;
 
-    if (result.success) {
-      setTimeout(() => {
-        fireConfetti();
-        playCompleteSound();
-      }, 300);
-      addToast('Groups created successfully!', 'success');
-    } else {
-      result.warnings.forEach(warning => {
-        addToast(warning, 'warning');
-      });
-    }
+    let currentStep = 0;
+    const interval = setInterval(() => {
+      const tempResult = createGroups(
+        students,
+        settings.numGroups,
+        settings.groupNames,
+        settings.forcePairings,
+        settings.forceAssignments
+      );
+      setGroups(tempResult.groups);
+      currentStep++;
+
+      if (currentStep >= animationSteps) {
+        clearInterval(interval);
+        setGroups(result.groups);
+        setIsAnimating(false);
+        addEntry(result.groups);
+        trackGrouping(result.groups);
+
+        if (result.success) {
+          setTimeout(() => {
+            fireConfetti();
+            playCompleteSound();
+          }, 100);
+          addToast('Groups created successfully!', 'success');
+        } else {
+          result.warnings.forEach(warning => {
+            addToast(warning, 'warning');
+          });
+        }
+      }
+    }, intervalDuration);
   };
 
   const handleExport = () => {
@@ -193,7 +218,8 @@ function App() {
           text: '#1f2937',
           card: '#ffffff',
           accent: '#3b82f6'
-        }
+        },
+        animationDuration: 2000
       });
       setGroups([]);
       addToast('Settings reset successfully!', 'success');
@@ -293,12 +319,12 @@ function App() {
           <div className="flex flex-wrap gap-3">
             <button
               onClick={handleRandomize}
-              disabled={students.length === 0}
+              disabled={students.length === 0 || isAnimating}
               className="flex items-center gap-2 px-6 py-2 text-white rounded-lg font-medium shadow-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               style={{ backgroundColor: themeColors.accent }}
             >
-              <Shuffle size={18} />
-              {groups.length > 0 ? 'Reroll' : 'Randomize'}
+              <Shuffle size={18} className={isAnimating ? 'animate-spin' : ''} />
+              {isAnimating ? 'Randomizing...' : groups.length > 0 ? 'Reroll' : 'Randomize'}
             </button>
             <button
               onClick={handleExport}
