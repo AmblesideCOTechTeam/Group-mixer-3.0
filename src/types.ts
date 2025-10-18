@@ -39,5 +39,4 @@ export interface Settings {
   forcePairings: ForcePairing[];
   forceAssignments: ForceAssignment[];
   colors: CustomColors;
-  animationDuration: number;
 }
