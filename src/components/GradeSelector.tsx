@@ -50,26 +50,27 @@ export function GradeSelector({
 
       <div className="flex flex-wrap gap-2">
         {availableGrades.map((grade) => {
-          const gradeLabel = `${grade}${isNaN(parseInt(grade)) ? '' : grade === '9' ? 'th' : grade === '10' ? 'th' : grade === '11' ? 'th' : 'th'}`;
           const isSelected = selectedGrades.includes(grade);
 
           return (
             <button
               key={grade}
               onClick={() => toggleGrade(grade)}
-              className={`px-4 py-2 rounded-lg font-medium transition-all ${
-                isSelected ? 'text-white shadow-md' : ''
-              }`}
+              className="px-4 py-2 rounded-lg font-medium transition-all"
               style={
                 isSelected
-                  ? { backgroundColor: themeColors.accent }
+                  ? {
+                      backgroundColor: themeColors.accent,
+                      color: '#ffffff'
+                    }
                   : {
                       backgroundColor: effectiveTheme === 'dark' ? '#374151' : '#e5e7eb',
-                      color: themeColors.text
+                      color: themeColors.text,
+                      border: `2px solid ${effectiveTheme === 'dark' ? '#4b5563' : '#d1d5db'}`
                     }
               }
             >
-              Grade {gradeLabel}
+              {grade}
             </button>
           );
         })}
