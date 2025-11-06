@@ -10,6 +10,7 @@ import { AnalyticsPanel } from './AnalyticsPanel';
 import { HelpPanel } from './HelpPanel';
 import { GroupColorsPanel } from './GroupColorsPanel';
 import { ConfettiToggle } from './ConfettiToggle';
+import { GradeSelector } from './GradeSelector';
 import { ThemeMode, LayoutDensity, BackgroundConfig } from '../hooks/useTheme';
 import { SoundConfig } from '../hooks/useSound';
 import { HistoryEntry } from '../hooks/useHistory';
@@ -162,6 +163,16 @@ export function SettingsModal({
         <div className="p-6 overflow-y-auto" style={{ maxHeight: 'calc(90vh - 160px)' }}>
           {activeTab === 'general' && (
             <div className="space-y-4">
+              <GradeSelector
+                students={students}
+                selectedGrades={settings.selectedGrades}
+                onGradesChange={(grades) =>
+                  onSettingsChange({ ...settings, selectedGrades: grades })
+                }
+                themeColors={themeColors}
+                effectiveTheme={effectiveTheme}
+              />
+
               <div>
                 <label className="block text-sm font-medium mb-2" style={{ color: themeColors.text }}>
                   Number of Groups

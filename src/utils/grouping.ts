@@ -76,8 +76,8 @@ export function createGroups(
     groups[bestGroupIdx].students.push(...pairingGroup);
   });
 
-  // Ensure each group has balanced gender and grade distribution
-  const requiredGrades = [9, 10, 11, 12];
+  // Get unique grades from available students
+  const uniqueGrades = Array.from(new Set(availableStudents.map(s => s.grade))).sort();
   const requiredGenders: Array<'m' | 'f'> = ['m', 'f'];
 
   // First pass: Ensure each group has at least one of each gender
@@ -96,7 +96,7 @@ export function createGroups(
   }
 
   // Second pass: Ensure each group has at least one from each grade
-  for (const grade of requiredGrades) {
+  for (const grade of uniqueGrades) {
     const groupIndices = shuffleArray(Array.from({ length: numGroups }, (_, i) => i));
     for (const i of groupIndices) {
       const groupHasGrade = groups[i].students.some(s => s.grade === grade);
@@ -135,8 +135,8 @@ export function createGroups(
     const grades = new Set(group.students.map(s => s.grade));
     const genders = new Set(group.students.map(s => s.gender));
 
-    if (grades.size < 4) {
-      const missing = [9, 10, 11, 12].filter(g => !grades.has(g));
+    if (grades.size < uniqueGrades.length) {
+      const missing = uniqueGrades.filter(g => !grades.has(g));
       warnings.push(`${group.name}: Missing grades ${missing.join(', ')}`);
     }
 
