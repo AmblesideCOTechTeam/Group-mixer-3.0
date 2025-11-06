@@ -1,5 +1,5 @@
 export interface Student {
-  grade: string;
+  grade: number;
   gender: 'm' | 'f';
   first: string;
   last: string;
@@ -40,5 +40,4 @@ export interface Settings {
   forceAssignments: ForceAssignment[];
   colors: CustomColors;
   animationDuration?: number;
-  selectedGrades: string[];
 }

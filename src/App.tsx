@@ -45,8 +45,7 @@ function App() {
       card: '#ffffff',
       accent: '#3b82f6'
     },
-    animationDuration: 0.4,
-    selectedGrades: []
+    animationDuration: 0.4
   });
   const [modalOpen, setModalOpen] = useState(false);
   const [toasts, setToasts] = useState<Toast[]>([]);
@@ -146,18 +145,8 @@ function App() {
   const handleRandomize = () => {
     playShuffleSound();
 
-    // Filter students by selected grades if any are selected
-    const studentsToGroup = settings.selectedGrades.length > 0
-      ? students.filter(s => settings.selectedGrades.includes(String(s.grade)))
-      : students;
-
-    if (studentsToGroup.length === 0) {
-      addToast('No students in selected grades!', 'warning');
-      return;
-    }
-
     const result = createGroups(
-      studentsToGroup,
+      students,
       settings.numGroups,
       settings.groupNames,
       settings.forcePairings,
@@ -215,8 +204,7 @@ function App() {
           card: '#ffffff',
           accent: '#3b82f6'
         },
-        animationDuration: 0.4,
-        selectedGrades: []
+        animationDuration: 0.4
       });
       setGroups([]);
       addToast('Settings reset successfully!', 'success');
