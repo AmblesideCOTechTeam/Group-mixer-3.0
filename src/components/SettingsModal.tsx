@@ -1,4 +1,4 @@
-import { X, Settings as SettingsIcon, Palette, Volume2, Clock, BarChart3, Keyboard, Users, Sliders, Upload } from 'lucide-react';
+import { X, Settings as SettingsIcon, Palette, Volume2, Clock, BarChart3, Keyboard, Users, Sliders, Upload, Plus } from 'lucide-react';
 import { Settings } from '../types';
 import { ForcePairingPanel } from './ForcePairingPanel';
 import { CustomizationPanel } from './CustomizationPanel';
@@ -10,13 +10,14 @@ import { AnalyticsPanel } from './AnalyticsPanel';
 import { HelpPanel } from './HelpPanel';
 import { GroupColorsPanel } from './GroupColorsPanel';
 import { ConfettiToggle } from './ConfettiToggle';
+import { QuickAddStudent } from './QuickAddStudent';
 import { ThemeMode, LayoutDensity, BackgroundConfig } from '../hooks/useTheme';
 import { SoundConfig } from '../hooks/useSound';
 import { HistoryEntry } from '../hooks/useHistory';
 import { PairFrequency } from '../hooks/useAnalytics';
 import { Student } from '../types';
 import { useState } from 'react';
-import { Plus, Minus, RotateCcw } from 'lucide-react';
+import { Minus, RotateCcw } from 'lucide-react';
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -45,11 +46,12 @@ interface SettingsModalProps {
   onConfettiToggle: (enabled: boolean) => void;
   students: Student[];
   onImport: (students: Student[]) => void;
+  onAddStudent: (student: Student) => void;
   themeColors: { card: string; text: string; accent: string; background: string };
   effectiveTheme: 'light' | 'dark';
 }
 
-type ActiveTab = 'general' | 'appearance' | 'colors' | 'sounds' | 'history' | 'analytics' | 'help' | 'pairing' | 'customize' | 'import';
+type ActiveTab = 'general' | 'appearance' | 'colors' | 'sounds' | 'history' | 'analytics' | 'help' | 'pairing' | 'customize' | 'import' | 'add-student';
 
 export function SettingsModal({
   isOpen,
@@ -78,6 +80,7 @@ export function SettingsModal({
   onConfettiToggle,
   students,
   onImport,
+  onAddStudent,
   themeColors,
   effectiveTheme
 }: SettingsModalProps) {
@@ -115,6 +118,7 @@ export function SettingsModal({
     { id: 'analytics', label: 'Analytics', icon: BarChart3 },
     { id: 'pairing', label: 'Force Pairing', icon: Users },
     { id: 'customize', label: 'Customization', icon: Sliders },
+    { id: 'add-student', label: 'Add Student', icon: Plus },
     { id: 'import', label: 'Import', icon: Upload },
     { id: 'help', label: 'Help', icon: Keyboard }
   ];
@@ -303,6 +307,14 @@ export function SettingsModal({
               onColorsChange={(colors) =>
                 onSettingsChange({ ...settings, colors })
               }
+            />
+          )}
+
+          {activeTab === 'add-student' && (
+            <QuickAddStudent
+              onAdd={onAddStudent}
+              themeColors={themeColors}
+              effectiveTheme={effectiveTheme}
             />
           )}
 
