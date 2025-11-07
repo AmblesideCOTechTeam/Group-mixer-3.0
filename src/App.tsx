@@ -7,6 +7,7 @@ import { createGroups } from './utils/grouping';
 import { GroupCard } from './components/GroupCard';
 import { SettingsModal } from './components/SettingsModal';
 import { ToastContainer } from './components/Toast';
+import { QuickAddStudent } from './components/QuickAddStudent';
 import { DEFAULT_CSV } from './defaultData';
 import { useTheme } from './hooks/useTheme';
 import { useSound } from './hooks/useSound';
@@ -191,6 +192,11 @@ function App() {
     setModalOpen(false);
   };
 
+  const handleAddStudent = (newStudent: Student) => {
+    setStudents(prev => [...prev, newStudent]);
+    addToast(`${newStudent.first} ${newStudent.last} added successfully!`, 'success');
+  };
+
   const handleReset = () => {
     if (confirm('Are you sure you want to reset all settings? This cannot be undone.')) {
       setSettings({
@@ -311,6 +317,7 @@ function App() {
               <Shuffle size={18} />
               {groups.length > 0 ? 'Reroll' : 'Randomize'}
             </button>
+            <QuickAddStudent onAdd={handleAddStudent} students={students} />
             <button
               onClick={handleExport}
               disabled={groups.length === 0}
