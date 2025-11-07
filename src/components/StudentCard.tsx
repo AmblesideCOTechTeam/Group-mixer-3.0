@@ -8,6 +8,9 @@ interface StudentCardProps {
 }
 
 const gradeColors: Record<number, string> = {
+  6: 'bg-cyan-500',
+  7: 'bg-teal-500',
+  8: 'bg-sky-500',
   9: 'bg-blue-500',
   10: 'bg-green-500',
   11: 'bg-orange-500',
@@ -19,6 +22,9 @@ export function StudentCard({ student, index }: StudentCardProps) {
 
   // Check if user prefers reduced motion
   const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // Get grade color with fallback
+  const gradeColor = gradeColors[student.grade] || 'bg-gray-500';
 
   return (
     <motion.div
@@ -39,7 +45,7 @@ export function StudentCard({ student, index }: StudentCardProps) {
         {student.first} {student.last}
       </div>
       <div className="text-xs text-gray-500 flex items-center gap-2 mt-1">
-        <span className={`${gradeColors[student.grade]} text-white px-2 py-0.5 rounded-full font-medium`}>
+        <span className={`${gradeColor} text-white px-2 py-0.5 rounded-full font-medium`}>
           Grade {student.grade}
         </span>
         <span className="text-gray-400">
