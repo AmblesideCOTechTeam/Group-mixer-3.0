@@ -7,12 +7,14 @@ import { createGroups } from './utils/grouping';
 import { GroupCard } from './components/GroupCard';
 import { SettingsModal } from './components/SettingsModal';
 import { ToastContainer } from './components/Toast';
+import { LoginPage } from './components/LoginPage';
 import { DEFAULT_CSV } from './defaultData';
 import { useTheme } from './hooks/useTheme';
 import { useSound } from './hooks/useSound';
 import { useHistory } from './hooks/useHistory';
 import { useAnalytics } from './hooks/useAnalytics';
 import { useKeyboard } from './hooks/useKeyboard';
+import { useAuth } from './context/AuthContext';
 
 const STORAGE_KEY = 'grade-mixer-data';
 const CONFETTI_KEY = 'grade-mixer-confetti';
@@ -31,6 +33,23 @@ const colorPalette = [
 ];
 
 function App() {
+  const { isAuthenticated, isLoading } = useAuth();
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-600 to-blue-800 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
+          <p className="text-white text-lg font-medium">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return <LoginPage />;
+  }
+
   const [students, setStudents] = useState<Student[]>([]);
   const [groups, setGroups] = useState<Group[]>([]);
   const [groupOrder, setGroupOrder] = useState<number[]>([]);
