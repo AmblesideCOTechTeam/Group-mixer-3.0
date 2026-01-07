@@ -1,4 +1,4 @@
-import { X, Settings as SettingsIcon, Palette, Volume2, Clock, BarChart3, Keyboard, Users, Sliders, Upload, Plus, Shield, Activity, LogOut } from 'lucide-react';
+import { X, Settings as SettingsIcon, Palette, Volume2, Clock, BarChart3, Keyboard, Users, Sliders, Upload, Plus } from 'lucide-react';
 import { Settings } from '../types';
 import { ForcePairingPanel } from './ForcePairingPanel';
 import { CustomizationPanel } from './CustomizationPanel';
@@ -11,8 +11,6 @@ import { HelpPanel } from './HelpPanel';
 import { GroupColorsPanel } from './GroupColorsPanel';
 import { ConfettiToggle } from './ConfettiToggle';
 import { QuickAddStudent } from './QuickAddStudent';
-import { AdminPanel } from './AdminPanel';
-import { AuditLogViewer } from './AuditLogViewer';
 import { ThemeMode, LayoutDensity, BackgroundConfig } from '../hooks/useTheme';
 import { SoundConfig } from '../hooks/useSound';
 import { HistoryEntry } from '../hooks/useHistory';
@@ -20,8 +18,6 @@ import { PairFrequency } from '../hooks/useAnalytics';
 import { Student } from '../types';
 import { useState } from 'react';
 import { Minus, RotateCcw } from 'lucide-react';
-import { usePermissions } from '../hooks/usePermissions';
-import { useAuth } from '../context/AuthContext';
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -55,7 +51,7 @@ interface SettingsModalProps {
   effectiveTheme: 'light' | 'dark';
 }
 
-type ActiveTab = 'general' | 'appearance' | 'colors' | 'sounds' | 'history' | 'analytics' | 'help' | 'pairing' | 'customize' | 'import' | 'add-student' | 'admin' | 'audit';
+type ActiveTab = 'general' | 'appearance' | 'colors' | 'sounds' | 'history' | 'analytics' | 'help' | 'pairing' | 'customize' | 'import' | 'add-student';
 
 export function SettingsModal({
   isOpen,
@@ -88,8 +84,6 @@ export function SettingsModal({
   themeColors,
   effectiveTheme
 }: SettingsModalProps) {
-  const { logout } = useAuth();
-  const { canViewTab } = usePermissions();
   const [activeTab, setActiveTab] = useState<ActiveTab>('general');
 
   if (!isOpen) return null;
@@ -115,7 +109,7 @@ export function SettingsModal({
     onSettingsChange({ ...settings, groupNames: newNames });
   };
 
-  const allTabs: Array<{ id: ActiveTab; label: string; icon: any }> = [
+  const tabs: Array<{ id: ActiveTab; label: string; icon: any }> = [
     { id: 'general', label: 'General', icon: SettingsIcon },
     { id: 'appearance', label: 'Appearance', icon: Palette },
     { id: 'colors', label: 'Colors', icon: Palette },
@@ -126,12 +120,8 @@ export function SettingsModal({
     { id: 'customize', label: 'Customization', icon: Sliders },
     { id: 'add-student', label: 'Add Student', icon: Plus },
     { id: 'import', label: 'Import', icon: Upload },
-    { id: 'admin', label: 'Admin', icon: Shield },
-    { id: 'audit', label: 'Audit Logs', icon: Activity },
     { id: 'help', label: 'Help', icon: Keyboard }
   ];
-
-  const tabs = allTabs.filter(tab => canViewTab(tab.id));
 
   return (
     <>
@@ -326,14 +316,6 @@ export function SettingsModal({
               themeColors={themeColors}
               effectiveTheme={effectiveTheme}
             />
-          )}
-
-          {activeTab === 'admin' && (
-            <AdminPanel />
-          )}
-
-          {activeTab === 'audit' && (
-            <AuditLogViewer />
           )}
 
           {activeTab === 'import' && (
