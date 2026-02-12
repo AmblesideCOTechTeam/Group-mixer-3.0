@@ -11,6 +11,7 @@ import { HelpPanel } from './HelpPanel';
 import { GroupColorsPanel } from './GroupColorsPanel';
 import { ConfettiToggle } from './ConfettiToggle';
 import { QuickAddStudent } from './QuickAddStudent';
+import { ManageStudents } from './ManageStudents';
 import { ThemeMode, LayoutDensity, BackgroundConfig } from '../hooks/useTheme';
 import { SoundConfig } from '../hooks/useSound';
 import { HistoryEntry } from '../hooks/useHistory';
