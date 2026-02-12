@@ -4,6 +4,8 @@ export interface Student {
   first: string;
   last: string;
   email: string;
+  role?: 'leader';
+  absent?: boolean;
 }
 
 export interface GroupedStudent extends Student {

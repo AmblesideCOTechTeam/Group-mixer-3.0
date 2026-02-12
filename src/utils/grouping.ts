@@ -32,11 +32,13 @@ export function createGroups(
     });
   }
 
-  const studentsPerGroup = Math.floor(students.length / numGroups);
-  const extraStudents = students.length % numGroups;
+  // Filter out absent students
+  const presentStudents = students.filter(s => !s.absent);
+  const studentsPerGroup = Math.floor(presentStudents.length / numGroups);
+  const extraStudents = presentStudents.length % numGroups;
 
   // Randomize the initial order before any processing
-  const allStudents = shuffleArray(shuffleArray(shuffleArray([...students])));
+  const allStudents = shuffleArray(shuffleArray(shuffleArray([...presentStudents])));
   const availableStudents = [...allStudents];
 
   forceAssignments.forEach(assignment => {
@@ -76,38 +78,38 @@ export function createGroups(
     groups[bestGroupIdx].students.push(...pairingGroup);
   });
 
-  // Ensure each group has balanced gender and grade distribution
+  // Priority pass: Distribute students by grade to ensure even distribution
   const requiredGrades = [9, 10, 11, 12];
   const requiredGenders: Array<'m' | 'f'> = ['m', 'f'];
 
-  // First pass: Ensure each group has at least one of each gender
-  for (const gender of requiredGenders) {
+  // Distribute by grades first for better balance
+  for (const grade of requiredGrades) {
+    const studentsWithGrade = availableStudents.filter(s => s.grade === grade);
     const groupIndices = shuffleArray(Array.from({ length: numGroups }, (_, i) => i));
-    for (const i of groupIndices) {
-      const groupHasGender = groups[i].students.some(s => s.gender === gender);
-      if (!groupHasGender) {
-        const studentIndex = availableStudents.findIndex(s => s.gender === gender);
-        if (studentIndex !== -1) {
-          groups[i].students.push(availableStudents[studentIndex]);
-          availableStudents.splice(studentIndex, 1);
-        }
+
+    studentsWithGrade.forEach((student, idx) => {
+      const targetGroupIndex = groupIndices[idx % groupIndices.length];
+      groups[targetGroupIndex].students.push(student);
+      const availIdx = availableStudents.indexOf(student);
+      if (availIdx !== -1) {
+        availableStudents.splice(availIdx, 1);
       }
-    }
+    });
   }
 
-  // Second pass: Ensure each group has at least one from each grade
-  for (const grade of requiredGrades) {
+  // Balance by gender for remaining students
+  for (const gender of requiredGenders) {
+    const studentsWithGender = availableStudents.filter(s => s.gender === gender);
     const groupIndices = shuffleArray(Array.from({ length: numGroups }, (_, i) => i));
-    for (const i of groupIndices) {
-      const groupHasGrade = groups[i].students.some(s => s.grade === grade);
-      if (!groupHasGrade) {
-        const studentIndex = availableStudents.findIndex(s => s.grade === grade);
-        if (studentIndex !== -1) {
-          groups[i].students.push(availableStudents[studentIndex]);
-          availableStudents.splice(studentIndex, 1);
-        }
+
+    studentsWithGender.forEach((student, idx) => {
+      const targetGroupIndex = groupIndices[idx % groupIndices.length];
+      groups[targetGroupIndex].students.push(student);
+      const availIdx = availableStudents.indexOf(student);
+      if (availIdx !== -1) {
+        availableStudents.splice(availIdx, 1);
       }
-    }
+    });
   }
 
   // Distribute remaining students with randomized group order

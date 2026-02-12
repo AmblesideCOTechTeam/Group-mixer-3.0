@@ -111,6 +111,7 @@ export function SettingsModal({
 
   const tabs: Array<{ id: ActiveTab; label: string; icon: any }> = [
     { id: 'general', label: 'General', icon: SettingsIcon },
+    { id: 'manage', label: 'Manage Students', icon: Users },
     { id: 'appearance', label: 'Appearance', icon: Palette },
     { id: 'colors', label: 'Colors', icon: Palette },
     { id: 'sounds', label: 'Sounds', icon: Volume2 },
@@ -307,6 +308,16 @@ export function SettingsModal({
               onColorsChange={(colors) =>
                 onSettingsChange({ ...settings, colors })
               }
+            />
+          )}
+
+          {activeTab === 'manage' && (
+            <ManageStudents
+              students={students}
+              onUpdateStudent={onUpdateStudent}
+              onRemoveStudent={onRemoveStudent}
+              themeColors={themeColors}
+              effectiveTheme={effectiveTheme}
             />
           )}
 
