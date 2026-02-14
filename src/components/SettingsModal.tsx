@@ -48,6 +48,8 @@ interface SettingsModalProps {
   students: Student[];
   onImport: (students: Student[]) => void;
   onAddStudent: (student: Student) => void;
+  onUpdateStudent: (email: string, updates: Partial<Student>) => void;
+  onRemoveStudent: (email: string) => void;
   themeColors: { card: string; text: string; accent: string; background: string };
   effectiveTheme: 'light' | 'dark';
 }
@@ -82,6 +84,8 @@ export function SettingsModal({
   students,
   onImport,
   onAddStudent,
+  onUpdateStudent,
+  onRemoveStudent,
   themeColors,
   effectiveTheme
 }: SettingsModalProps) {

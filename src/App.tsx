@@ -196,6 +196,15 @@ function App() {
     addToast(`${newStudent.first} ${newStudent.last} added successfully!`, 'success');
   };
 
+  const handleUpdateStudent = (email: string, updates: Partial<Student>) => {
+    setStudents(prev => prev.map(s => s.email === email ? { ...s, ...updates } : s));
+  };
+
+  const handleRemoveStudent = (email: string) => {
+    setStudents(prev => prev.filter(s => s.email !== email));
+    addToast('Student removed successfully!', 'success');
+  };
+
   const handleReset = () => {
     if (confirm('Are you sure you want to reset all settings? This cannot be undone.')) {
       setSettings({
@@ -415,6 +424,8 @@ function App() {
         students={students}
         onImport={handleImport}
         onAddStudent={handleAddStudent}
+        onUpdateStudent={handleUpdateStudent}
+        onRemoveStudent={handleRemoveStudent}
         themeColors={themeColors}
         effectiveTheme={effectiveTheme}
       />
