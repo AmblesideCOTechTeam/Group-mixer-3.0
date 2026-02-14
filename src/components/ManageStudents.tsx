@@ -6,7 +6,7 @@ interface ManageStudentsProps {
   students: Student[];
   onUpdateStudent: (email: string, updates: Partial<Student>) => void;
   onRemoveStudent: (email: string) => void;
-  themeColors: { card: string; text: string; accent: string };
+  themeColors: { card: string; text: string; accent: string; background?: string };
   effectiveTheme: 'light' | 'dark';
 }
 
@@ -63,11 +63,12 @@ export function ManageStudents({
         placeholder="Search students..."
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
-        className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:border-transparent"
+        className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:border-transparent focus:outline-none"
         style={{
           borderColor: effectiveTheme === 'dark' ? '#374151' : '#d1d5db',
           backgroundColor: effectiveTheme === 'dark' ? '#1f2937' : '#ffffff',
-          color: themeColors.text
+          color: themeColors.text,
+          caretColor: themeColors.text
         }}
       />
 
