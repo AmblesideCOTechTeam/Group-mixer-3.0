@@ -170,30 +170,22 @@ function App() {
         fireConfetti();
         playCompleteSound();
       }, 300);
-      addToast('Groups created successfully!', 'success');
-    } else {
-      result.warnings.forEach(warning => {
-        addToast(warning, 'warning');
-      });
     }
   };
 
   const handleExport = () => {
     const csvContent = exportCSV(groups);
     downloadCSV(csvContent, 'grade-mixer-groups.csv');
-    addToast('Groups exported successfully!', 'success');
   };
 
   const handleImport = (newStudents: Student[]) => {
     setStudents(newStudents);
     setGroups([]);
-    addToast('Students imported successfully!', 'success');
     setModalOpen(false);
   };
 
   const handleAddStudent = (newStudent: Student) => {
     setStudents(prev => [...prev, newStudent]);
-    addToast(`${newStudent.first} ${newStudent.last} added successfully!`, 'success');
   };
 
   const handleUpdateStudent = (email: string, updates: Partial<Student>) => {
@@ -202,7 +194,6 @@ function App() {
 
   const handleRemoveStudent = (email: string) => {
     setStudents(prev => prev.filter(s => s.email !== email));
-    addToast('Student removed successfully!', 'success');
   };
 
   const handleReset = () => {
@@ -221,7 +212,6 @@ function App() {
         animationDuration: 0.4
       });
       setGroups([]);
-      addToast('Settings reset successfully!', 'success');
     }
   };
 
@@ -237,12 +227,10 @@ function App() {
 
   const handleHistoryRestore = (entry: any) => {
     setGroups(entry.groups);
-    addToast('Shuffle restored from history!', 'success');
   };
 
   const handleCopyLayout = () => {
     if (groups.length === 0) {
-      addToast('No groups to copy!', 'warning');
       return;
     }
 
@@ -255,9 +243,7 @@ function App() {
       text += '\n';
     });
 
-    navigator.clipboard.writeText(text).then(() => {
-      addToast('Layout copied to clipboard!', 'success');
-    });
+    navigator.clipboard.writeText(text);
   };
 
   const handleGroupColorChange = (groupIndex: number, color: string) => {

@@ -37,28 +37,23 @@ export function createGroups(
   const studentsPerGroup = Math.floor(presentStudents.length / numGroups);
   const extraStudents = presentStudents.length % numGroups;
 
-  // Randomize the initial order before any processing
-  const allStudents = shuffleArray(shuffleArray(shuffleArray([...presentStudents])));
-  const availableStudents = [...allStudents];
+  // Separate leaders from non-leaders
+  const leaders = presentStudents.filter(s => s.leader);
+  const nonLeaders = presentStudents.filter(s => !s.leader);
+
+  // Handle force assignments and pairings first
+  const availableStudents = [...presentStudents];
+  const usedStudents = new Set<Student>();
 
   forceAssignments.forEach(assignment => {
-    if (assignment.groupIndex < numGroups) {
-      const studentIndex = availableStudents.findIndex(s => s === assignment.student);
-      if (studentIndex !== -1) {
-        groups[assignment.groupIndex].students.push(assignment.student);
-        availableStudents.splice(studentIndex, 1);
-      }
+    if (assignment.groupIndex < numGroups && availableStudents.includes(assignment.student)) {
+      groups[assignment.groupIndex].students.push(assignment.student);
+      usedStudents.add(assignment.student);
     }
   });
 
   const pairingGroups = forcePairings.map(pairing => {
-    const validStudents = pairing.students.filter(s => availableStudents.includes(s));
-    validStudents.forEach(s => {
-      const idx = availableStudents.indexOf(s);
-      if (idx !== -1) {
-        availableStudents.splice(idx, 1);
-      }
-    });
+    const validStudents = pairing.students.filter(s => availableStudents.includes(s) && !usedStudents.has(s));
     return validStudents;
   });
 
@@ -76,74 +71,59 @@ export function createGroups(
     }
 
     groups[bestGroupIdx].students.push(...pairingGroup);
+    pairingGroup.forEach(s => usedStudents.add(s));
   });
 
-  // Priority pass: Distribute students by grade to ensure even distribution
-  const requiredGrades = [9, 10, 11, 12];
-  const requiredGenders: Array<'m' | 'f'> = ['m', 'f'];
+  // Get remaining students (not used in forced assignments or pairings)
+  const remainingStudents = presentStudents.filter(s => !usedStudents.has(s));
+  const remainingLeaders = shuffleArray(remainingStudents.filter(s => s.leader));
+  const remainingNonLeaders = shuffleArray(remainingStudents.filter(s => !s.leader));
 
-  // Distribute by grades first for better balance
-  for (const grade of requiredGrades) {
-    const studentsWithGrade = availableStudents.filter(s => s.grade === grade);
-    const groupIndices = shuffleArray(Array.from({ length: numGroups }, (_, i) => i));
+  // Distribute leaders first - at least one per group if possible
+  remainingLeaders.forEach((leader, idx) => {
+    const groupIdx = idx % numGroups;
+    groups[groupIdx].students.push(leader);
+  });
 
-    studentsWithGrade.forEach((student, idx) => {
-      const targetGroupIndex = groupIndices[idx % groupIndices.length];
-      groups[targetGroupIndex].students.push(student);
-      const availIdx = availableStudents.indexOf(student);
-      if (availIdx !== -1) {
-        availableStudents.splice(availIdx, 1);
+  // Now distribute remaining non-leaders to keep groups balanced
+  const totalRemaining = remainingNonLeaders.length;
+  let assignedCount = 0;
+
+  // Calculate target sizes for each group
+  const groupSizes = groups.map(g => g.students.length);
+
+  for (let i = 0; i < totalRemaining; i++) {
+    // Find group with smallest size
+    let smallestIdx = 0;
+    let smallestSize = groupSizes[0];
+
+    for (let j = 1; j < numGroups; j++) {
+      if (groupSizes[j] < smallestSize) {
+        smallestSize = groupSizes[j];
+        smallestIdx = j;
       }
-    });
-  }
-
-  // Balance by gender for remaining students
-  for (const gender of requiredGenders) {
-    const studentsWithGender = availableStudents.filter(s => s.gender === gender);
-    const groupIndices = shuffleArray(Array.from({ length: numGroups }, (_, i) => i));
-
-    studentsWithGender.forEach((student, idx) => {
-      const targetGroupIndex = groupIndices[idx % groupIndices.length];
-      groups[targetGroupIndex].students.push(student);
-      const availIdx = availableStudents.indexOf(student);
-      if (availIdx !== -1) {
-        availableStudents.splice(availIdx, 1);
-      }
-    });
-  }
-
-  // Distribute remaining students with randomized group order
-  const distributionOrder = shuffleArray(Array.from({ length: numGroups }, (_, i) => i));
-  let orderIndex = 0;
-
-  while (availableStudents.length > 0) {
-    const currentGroupIndex = distributionOrder[orderIndex % distributionOrder.length];
-    const targetSize = currentGroupIndex < extraStudents ? studentsPerGroup + 1 : studentsPerGroup;
-
-    if (groups[currentGroupIndex].students.length < targetSize) {
-      groups[currentGroupIndex].students.push(availableStudents.shift()!);
     }
 
-    orderIndex++;
-    if (orderIndex >= numGroups) {
-      orderIndex = 0;
-    }
+    groups[smallestIdx].students.push(remainingNonLeaders[i]);
+    groupSizes[smallestIdx]++;
   }
 
-  // Shuffle students within each group to make force pairings less obvious
+  // Sort leaders to the top of each group without visual indication
   groups.forEach((group) => {
-    group.students = shuffleArray(group.students);
+    const leadersInGroup = group.students.filter(s => s.leader);
+    const nonLeadersInGroup = group.students.filter(s => !s.leader);
+    group.students = [...leadersInGroup, ...shuffleArray(nonLeadersInGroup)];
 
     const grades = new Set(group.students.map(s => s.grade));
     const genders = new Set(group.students.map(s => s.gender));
 
     if (grades.size < 4) {
       const missing = [9, 10, 11, 12].filter(g => !grades.has(g));
-      warnings.push(`${group.name}: Missing grades ${missing.join(', ')}`);
+      // Don't add grade warnings
     }
 
     if (genders.size < 2) {
-      warnings.push(`${group.name}: Missing ${genders.has('m') ? 'female' : 'male'} students`);
+      // Don't add gender warnings
     }
   });
 
