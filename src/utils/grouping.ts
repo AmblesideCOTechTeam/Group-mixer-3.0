@@ -77,7 +77,7 @@ export function createGroups(
   // Get remaining students (not used in forced assignments or pairings)
   const remainingStudents = presentStudents.filter(s => !usedStudents.has(s));
   const remainingLeaders = shuffleArray(remainingStudents.filter(s => s.leader));
-  const remainingNonLeaders = shuffleArray(remainingStudents.filter(s => !s.leader));
+  const remainingNonLeaders = remainingStudents.filter(s => !s.leader);
 
   // Distribute leaders first - at least one per group if possible
   remainingLeaders.forEach((leader, idx) => {
@@ -85,27 +85,43 @@ export function createGroups(
     groups[groupIdx].students.push(leader);
   });
 
-  // Now distribute remaining non-leaders to keep groups balanced
-  const totalRemaining = remainingNonLeaders.length;
-  let assignedCount = 0;
+  // Distribute remaining non-leaders by grade for balance
+  for (const grade of [9, 10, 11, 12]) {
+    const studentsWithGrade = shuffleArray(remainingNonLeaders.filter(s => s.grade === grade));
 
-  // Calculate target sizes for each group
-  const groupSizes = groups.map(g => g.students.length);
+    for (const student of studentsWithGrade) {
+      // Find group with smallest size
+      let smallestIdx = 0;
+      let smallestSize = groups[0].students.length;
 
-  for (let i = 0; i < totalRemaining; i++) {
-    // Find group with smallest size
+      for (let j = 1; j < numGroups; j++) {
+        if (groups[j].students.length < smallestSize) {
+          smallestSize = groups[j].students.length;
+          smallestIdx = j;
+        }
+      }
+
+      groups[smallestIdx].students.push(student);
+    }
+  }
+
+  // Distribute any remaining students (if grades not in 9-12)
+  const assignedStudents = new Set<Student>();
+  groups.forEach(g => g.students.forEach(s => assignedStudents.add(s)));
+  const stillRemaining = remainingNonLeaders.filter(s => !assignedStudents.has(s));
+
+  for (const student of stillRemaining) {
     let smallestIdx = 0;
-    let smallestSize = groupSizes[0];
+    let smallestSize = groups[0].students.length;
 
     for (let j = 1; j < numGroups; j++) {
-      if (groupSizes[j] < smallestSize) {
-        smallestSize = groupSizes[j];
+      if (groups[j].students.length < smallestSize) {
+        smallestSize = groups[j].students.length;
         smallestIdx = j;
       }
     }
 
-    groups[smallestIdx].students.push(remainingNonLeaders[i]);
-    groupSizes[smallestIdx]++;
+    groups[smallestIdx].students.push(student);
   }
 
   // Sort leaders to the top of each group without visual indication
