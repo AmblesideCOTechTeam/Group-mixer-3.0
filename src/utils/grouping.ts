@@ -109,11 +109,23 @@ export function createGroups(
     groups[smallestIdx].students.push(student);
   });
 
-  // Sort each group so leaders appear first, then shuffle remaining
+  // Sort leaders to the top of each group without visual indication
   groups.forEach((group) => {
     const leadersInGroup = group.students.filter(s => s.leader);
     const nonLeadersInGroup = group.students.filter(s => !s.leader);
-    group.students = [...leadersInGroup, ...nonLeadersInGroup];
+    group.students = [...leadersInGroup, ...shuffleArray(nonLeadersInGroup)];
+
+    const grades = new Set(group.students.map(s => s.grade));
+    const genders = new Set(group.students.map(s => s.gender));
+
+    if (grades.size < 4) {
+      const missing = [9, 10, 11, 12].filter(g => !grades.has(g));
+      // Don't add grade warnings
+    }
+
+    if (genders.size < 2) {
+      // Don't add gender warnings
+    }
   });
 
   return {
